@@ -207,16 +207,31 @@ function loadSectionData(sectionName) {
             loadDashboardData();
             break;
         case 'stations':
-            loadStationsData();
+            // Display existing data if available, otherwise load from API
+            if (appState.stationsData && appState.stationsData.length > 0) {
+                displayStationsGrid(appState.stationsData);
+            } else {
+                loadStationsData();
+            }
             break;
         case 'users':
-            loadCustomersData();
+            // Display existing data if available, otherwise load from API
+            if (appState.customersData && appState.customersData.length > 0) {
+                displayCustomerTable(appState.customersData);
+            } else {
+                loadCustomersData();
+            }
             break;
         case 'reports':
             loadReportsData();
             break;
         case 'pricing':
-            loadPricingData();
+            // Display existing data if available, otherwise load from API
+            if (appState.priceTableData && appState.priceTableData.length > 0) {
+                displayPriceTable(appState.priceTableData);
+            } else {
+                loadPricingData();
+            }
             break;
     }
 }
@@ -260,25 +275,38 @@ function setupLogoutListeners() {
 // Dashboard Data Management
 // ============================================
 function loadDashboardData() {
-    console.log('Loading dashboard data...');
+    console.log('📊 Loading all dashboard data from APIs...');
     
-    // TODO: Implement API call to fetch dashboard data
-    updateDashboardStats();
+    // Load all API data in parallel when dashboard loads
+    Promise.all([
+        loadStationsData(),
+        loadCustomersData(),
+        loadPricingData()
+    ]).then(() => {
+        console.log('✅ All dashboard data loaded successfully');
+        updateDashboardStats();
+    }).catch(error => {
+        console.error('❌ Error loading dashboard data:', error);
+    });
 }
 
 function updateDashboardStats() {
-    // Update customer count from loaded data
+    console.log('🔄 Updating dashboard statistics...');
+    
+    // Update stations count from loaded data
     const totalStationsEl = document.getElementById('totalStationsCount');
     const activeUsersEl = document.getElementById('activeUsersCount');
     
     if (totalStationsEl) {
         const stationsCount = appState.stationsData?.length || 0;
         totalStationsEl.textContent = stationsCount;
+        console.log('📍 Total Stations:', stationsCount);
     }
     
     if (activeUsersEl) {
         const customersCount = appState.customersData?.length || 0;
         activeUsersEl.textContent = customersCount;
+        console.log('👥 Total Customers:', customersCount);
     }
 }
 
@@ -304,18 +332,16 @@ async function loadStationsData() {
     
     const stationsGrid = document.querySelector('.stations-grid');
     
-    if (!stationsGrid) {
-        console.error('❌ Stations grid element not found');
-        return;
+    // Only show loading state if we're on the stations section
+    if (stationsGrid && appState.currentSection === 'stations') {
+        // Show loading state
+        stationsGrid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 48px; color: #00d4ff; margin-bottom: 16px; display: block;"></i>
+                <p style="color: #9ca3af; font-size: 16px;">Loading stations data...</p>
+            </div>
+        `;
     }
-    
-    // Show loading state
-    stationsGrid.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
-            <i class="fas fa-spinner fa-spin" style="font-size: 48px; color: #00d4ff; margin-bottom: 16px; display: block;"></i>
-            <p style="color: #9ca3af; font-size: 16px;">Loading stations data...</p>
-        </div>
-    `;
     
     try {
         console.log('🌐 Fetching stations data...');
@@ -343,10 +369,12 @@ async function loadStationsData() {
         // Store in state
         appState.stationsData = stationsData;
         
-        // Display data
-        displayStationsGrid(stationsData);
+        // Only display if we're on the stations section
+        if (appState.currentSection === 'stations' && stationsGrid) {
+            displayStationsGrid(stationsData);
+        }
         
-        // Update dashboard stats if on dashboard
+        // Update dashboard stats
         updateDashboardStats();
         
     } catch (error) {
@@ -354,18 +382,24 @@ async function loadStationsData() {
         console.error('❌ Error name:', error.name);
         console.error('❌ Error message:', error.message);
         
-        stationsGrid.innerHTML = `
-            <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
-                <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #ef4444; margin-bottom: 16px; display: block;"></i>
-                <p style="color: #ef4444; font-size: 16px; font-weight: 600;">Error loading stations data</p>
-                <p style="color: #9ca3af; font-size: 14px; margin-top: 8px;">${error.message}</p>
-                <button onclick="loadStationsData()" style="margin-top: 16px; padding: 10px 20px; background: var(--electric-blue); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">
-                    <i class="fas fa-redo"></i> Try Again
-                </button>
-            </div>
-        `;
+        // Only show error if we're on the stations section
+        if (stationsGrid && appState.currentSection === 'stations') {
+            stationsGrid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #ef4444; margin-bottom: 16px; display: block;"></i>
+                    <p style="color: #ef4444; font-size: 16px; font-weight: 600;">Error loading stations data</p>
+                    <p style="color: #9ca3af; font-size: 14px; margin-top: 8px;">${error.message}</p>
+                    <button onclick="loadStationsData()" style="margin-top: 16px; padding: 10px 20px; background: var(--electric-blue); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">
+                        <i class="fas fa-redo"></i> Try Again
+                    </button>
+                </div>
+            `;
+        }
         
-        showNotification('Failed to load stations data: ' + error.message, 'error');
+        // Still show notification even if not on stations section
+        if (appState.currentSection === 'stations') {
+            showNotification('Failed to load stations data: ' + error.message, 'error');
+        }
     }
 }
 
@@ -632,20 +666,18 @@ async function loadCustomersData() {
     
     const tableBody = document.getElementById('userTableBody');
     
-    if (!tableBody) {
-        console.error('❌ Customer table body element not found');
-        return;
+    // Only show loading state if we're on the users section
+    if (tableBody && appState.currentSection === 'users') {
+        // Show loading state
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 40px;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 48px; color: #00d4ff; margin-bottom: 16px;"></i>
+                    <p style="color: #9ca3af; font-size: 16px;">Loading customer data...</p>
+                </td>
+            </tr>
+        `;
     }
-    
-    // Show loading state
-    tableBody.innerHTML = `
-        <tr>
-            <td colspan="6" style="text-align: center; padding: 40px;">
-                <i class="fas fa-spinner fa-spin" style="font-size: 48px; color: #00d4ff; margin-bottom: 16px;"></i>
-                <p style="color: #9ca3af; font-size: 16px;">Loading customer data...</p>
-            </td>
-        </tr>
-    `;
     
     try {
         console.log('🌐 Fetching customer data...');
@@ -673,10 +705,12 @@ async function loadCustomersData() {
         // Store in state
         appState.customersData = customerData;
         
-        // Display data
-        displayCustomerTable(customerData);
+        // Only display if we're on the users section
+        if (appState.currentSection === 'users' && tableBody) {
+            displayCustomerTable(customerData);
+        }
         
-        // Update dashboard stats if on dashboard
+        // Update dashboard stats
         updateDashboardStats();
         
     } catch (error) {
@@ -684,20 +718,26 @@ async function loadCustomersData() {
         console.error('❌ Error name:', error.name);
         console.error('❌ Error message:', error.message);
         
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="6" style="text-align: center; padding: 40px;">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #ef4444; margin-bottom: 16px;"></i>
-                    <p style="color: #ef4444; font-size: 16px; font-weight: 600;">Error loading customer data</p>
-                    <p style="color: #9ca3af; font-size: 14px; margin-top: 8px;">${error.message}</p>
-                    <button onclick="loadCustomersData()" style="margin-top: 16px; padding: 8px 16px; background: var(--electric-blue); color: white; border: none; border-radius: 8px; cursor: pointer;">
-                        <i class="fas fa-redo"></i> Try Again
-                    </button>
-                </td>
-            </tr>
-        `;
+        // Only show error if we're on the users section
+        if (tableBody && appState.currentSection === 'users') {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #ef4444; margin-bottom: 16px;"></i>
+                        <p style="color: #ef4444; font-size: 16px; font-weight: 600;">Error loading customer data</p>
+                        <p style="color: #9ca3af; font-size: 14px; margin-top: 8px;">${error.message}</p>
+                        <button onclick="loadCustomersData()" style="margin-top: 16px; padding: 8px 16px; background: var(--electric-blue); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            <i class="fas fa-redo"></i> Try Again
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }
         
-        showNotification('Failed to load customer data: ' + error.message, 'error');
+        // Still show notification if on users section
+        if (appState.currentSection === 'users') {
+            showNotification('Failed to load customer data: ' + error.message, 'error');
+        }
     }
 }
 
