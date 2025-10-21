@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ElectroMove - Admin Dashboard</title>
+    <link rel="stylesheet" href="styles/admin.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-bolt"></i>
+                    <span>ElectroMove</span>
+                    <div class="admin-badge">Admin</div>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item active" data-section="dashboard">
+                        <a href="#dashboard">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-section="stations">
+                        <a href="#stations">
+                            <i class="fas fa-charging-station"></i>
+                            <span>Station Management</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-section="users">
+                        <a href="#users">
+                            <i class="fas fa-users"></i>
+                            <span>Customer Management</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-section="reports">
+                        <a href="#reports">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Reports & Statistics</span>
+                        </a>
+                    </li>
+                    <!-- Add Price management menu item -->
+                    <li class="nav-item" data-section="pricing">
+                        <a href="#pricing">
+                            <i class="fas fa-dollar-sign"></i>
+                            <span>Price Management</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="admin-profile">
+                    <img src="images/adminavt.jpg" alt="Admin" class="profile-avatar">
+                    <div class="profile-info">
+                        <div class="profile-name">Admin User</div>
+                        <div class="profile-role">System Administrator</div>
+                    </div>
+                </div>
+                <button class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="sidebar-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-title">Dashboard</h1>
+                </div>
+                <div class="header-right">
+                    <div class="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-count">3</span>
+                    </div>
+                    <div class="current-time" id="currentTime"></div>
+                </div>
+            </header>
+
+            <!-- Dashboard Overview Section -->
+            <section id="dashboard-section" class="content-section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-charging-station"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Total Stations</h3>
+                            <div class="stat-value" id="totalStationsCount"></div>                            
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Active Users</h3>
+                            <div class="stat-value" id="activeUsersCount"></div>                            
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Monthly Revenue</h3>
+                            <div class="stat-value">$47,392</div>
+                            <div class="stat-change positive">+15% from last month</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Energy Consumed</h3>
+                            <div class="stat-value">1,238 kWh</div>
+                            <div class="stat-change negative">-3% from last month</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard charts removed -->
+            </section>
+
+            <!-- Station & Charging Point Management Section -->
+            <section id="stations-section" class="content-section">
+                <div class="section-header">
+                    <h2>Station & Charging Point Management</h2>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn btn-primary" onclick="loadStationsData()" style="display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-sync-alt"></i> Refresh Stations
+                        </button>
+                        <button class="btn btn-primary" id="addStationBtn" onclick="openAddStationModal()">
+                            <i class="fas fa-plus"></i> Add New Station
+                        </button>
+                    </div>
+                </div>
+
+                <div class="management-tabs">
+                    <button class="tab-btn active" data-tab="monitoring">
+                        <i class="fas fa-desktop"></i>
+                        Station Monitoring
+                    </button>
+                </div>
+
+                <!-- Station Monitoring Tab -->
+                <div id="monitoring-tab" class="tab-content active">
+                    <div class="filters">
+                        <input type="text" id="searchStation" placeholder="Search stations by name, location, or ID...">
+                    </div>
+
+                    <div class="stations-grid">
+                        <!-- Station cards will be dynamically generated -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Customer Management Section -->
+            <section id="users-section" class="content-section">
+                <div class="section-header">
+                    <h2>Customer Management</h2>
+                    <button class="btn btn-primary" onclick="loadCustomersData()" style="display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-sync-alt"></i> Refresh Customers
+                    </button>
+                </div>
+
+                <div class="user-stats">
+                    <div class="user-stat-card">
+                        <h4>Total Customers</h4>
+                        <div class="stat-number" id="totalCustomersCount">0</div>
+                    </div>
+                </div>
+
+                <div class="customer-filters">
+                    <input type="text" id="searchCustomer" placeholder="Search customers by name, email, phone, or address...">
+                </div>
+
+                <div class="user-table-container">
+                    <table class="user-table">
+                        <thead>
+                            <tr>
+                                <th>Customer ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone Number</th>
+                                <th>Address</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody">
+                            <!-- Customer data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Reports & Statistics Section -->
+            <section id="reports-section" class="content-section">
+                <div class="section-header">
+                    <h2>Reports & Statistics</h2>
+                    <div style="display: flex; gap: 12px;">
+                        <select id="reportPeriod" class="report-filter">
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month" selected>This Month</option>
+                            <option value="year">This Year</option>
+                        </select>
+                        <button class="btn btn-primary" id="exportReportBtn">
+                            <i class="fas fa-file-export"></i>
+                            Export Report
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Statistics Overview -->
+                <div class="report-stats-grid">
+                    <div class="report-stat-card">
+                        <div class="report-stat-icon" style="background: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);">
+                            <i class="fas fa-charging-station"></i>
+                        </div>
+                        <div class="report-stat-content">
+                            <h4>Total Sessions</h4>
+                            <div class="report-stat-value" id="totalSessions">0</div>
+                            <div class="report-stat-label">Charging Sessions</div>
+                        </div>
+                    </div>
+
+                    <div class="report-stat-card">
+                        <div class="report-stat-icon" style="background: linear-gradient(135deg, #00ff88 0%, #00cc66 100%);">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="report-stat-content">
+                            <h4>Total Revenue</h4>
+                            <div class="report-stat-value" id="totalRevenue">$0</div>
+                            <div class="report-stat-label">From All Sessions</div>
+                        </div>
+                    </div>
+
+                    <div class="report-stat-card">
+                        <div class="report-stat-icon" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div class="report-stat-content">
+                            <h4>Energy Consumed</h4>
+                            <div class="report-stat-value" id="totalEnergy">0 kWh</div>
+                            <div class="report-stat-label">Total Energy</div>
+                        </div>
+                    </div>
+
+                    <div class="report-stat-card">
+                        <div class="report-stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="report-stat-content">
+                            <h4>Avg Session Time</h4>
+                            <div class="report-stat-value" id="avgSessionTime">0 min</div>
+                            <div class="report-stat-label">Average Duration</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Tables Section -->
+                <div class="report-tables-section">
+                    <div class="report-table-card">
+                        <h3><i class="fas fa-table"></i> Top Performing Stations</h3>
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Station Name</th>
+                                    <th>Total Sessions</th>
+                                    <th>Energy (kWh)</th>
+                                    <th>Revenue</th>
+                                    <th>Avg Session Time</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topStationsTableBody">
+                                <tr><td colspan="5" style="text-align: center;">Loading data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="report-table-card">
+                        <h3><i class="fas fa-car"></i> Most Active Vehicles</h3>
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Vehicle Name</th>
+                                    <th>License Plate</th>
+                                    <th>Total Sessions</th>
+                                    <th>Total Energy (kWh)</th>
+                                    <th>Total Cost</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topVehiclesTableBody">
+                                <tr><td colspan="5" style="text-align: center;">Loading data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="report-table-card">
+                        <h3><i class="fas fa-users"></i> Top Customers</h3>
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Customer Name</th>
+                                    <th>Email</th>
+                                    <th>Total Sessions</th>
+                                    <th>Total Spent</th>
+                                    <th>Last Session</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topCustomersTableBody">
+                                <tr><td colspan="5" style="text-align: center;">Loading data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+                        <!-- Price Management Section -->
+            <section id="pricing-section" class="content-section">
+                <div class="section-header">
+                    <h2>Price Management</h2>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn btn-info" id="refreshPricesBtn">
+                            <i class="fas fa-sync-alt"></i>
+                            Refresh
+                        </button>
+                        <button class="btn btn-primary" id="addPriceBtn">
+                            <i class="fas fa-plus"></i>
+                            Add New Price
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Price Table List -->
+                <div class="price-tables-container">
+                    <table class="price-table">
+                        <thead>
+                            <tr>
+                                <th>Price ID</th>
+                                <th>Price Per kWh</th>
+                                <th>Penalty Fee Per Minute</th>
+                                <th>Valid From</th>
+                                <th>Valid To</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="priceTableBody">
+                            <!-- Price data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="stationModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Station Details</h2>
+            <div id="stationDetails"></div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Price Modal -->
+    <div id="priceModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closePriceModal">&times;</span>
+            <h2 id="priceModalTitle">Add New Price</h2>
+            <form id="priceForm">
+                <div class="form-group">
+                    <label for="pricePerKwh">
+                        <i class="fas fa-bolt"></i>
+                        Price Per kWh
+                    </label>
+                    <input type="number" id="pricePerKwh" step="0.01" min="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="penaltyFee">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Penalty Fee Per Minute
+                    </label>
+                    <input type="number" id="penaltyFee" step="0.01" min="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="validFrom">
+                        <i class="fas fa-calendar-alt"></i>
+                        Valid From
+                    </label>
+                    <input type="date" id="validFrom" required>
+                </div>
+
+            <!-- Price Management Section -->
+            <section id="pricing-section" class="content-section">
+                <div class="section-header">
+                    <h2>Price Management</h2>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn btn-info" id="refreshPricesBtn">
+                            <i class="fas fa-sync-alt"></i>
+                            Refresh
+                        </button>
+                        <button class="btn btn-primary" id="addPriceBtn">
+                            <i class="fas fa-plus"></i>
+                            Add New Price
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Price Table List -->
+                <div class="price-tables-container">
+                    <table class="price-table">
+                        <thead>
+                            <tr>
+                                <th>Price ID</th>
+                                <th>Price Per kWh</th>
+                                <th>Penalty Fee Per Minute</th>
+                                <th>Valid From</th>
+                                <th>Valid To</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="priceTableBody">
+                            <!-- Price data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="stationModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Station Details</h2>
+            <div id="stationDetails"></div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Price Modal -->
+    <div id="priceModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closePriceModal">&times;</span>
+            <h2 id="priceModalTitle">Add New Price</h2>
+            <form id="priceForm">
+                <div class="form-group">
+                    <label for="pricePerKwh">
+                        <i class="fas fa-bolt"></i>
+                        Price Per kWh
+                    </label>
+                    <input type="number" id="pricePerKwh" step="0.01" min="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="penaltyFee">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Penalty Fee Per Minute
+                    </label>
+                    <input type="number" id="penaltyFee" step="0.01" min="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="validFrom">
+                        <i class="fas fa-calendar-alt"></i>
+                        Valid From
+                    </label>
+                    <input type="date" id="validFrom" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="validTo">
+                        <i class="fas fa-calendar-check"></i>
+                        Valid To
+                    </label>
+                    <input type="date" id="validTo" required>
+                </div>
+
+                <input type="hidden" id="priceId">
+                <input type="hidden" id="priceStatus">
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        Save Price
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="cancelPriceForm">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="stationModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Station Details</h2>
+            <div id="stationDetails"></div>
+        </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" class="modal">
+        <div class="modal-content logout-modal">
+            <div class="logout-icon">
+                <i class="fas fa-sign-out-alt"></i>
+            </div>
+            <h3>Confirm Logout</h3>
+            <p>Do you want to logout?</p>
+            <div class="logout-buttons">
+                <button id="confirmLogout" class="btn btn-danger">
+                    <i class="fas fa-check"></i>
+                    Yes
+                </button>
+                <button id="cancelLogout" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    No
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add New Station Modal -->
+    <div id="addStationModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+            <!-- Step 1: Station Information -->
+            <div id="addStationStep1">
+                <div class="modal-header">
+                    <h3>Add New Station - Step 1: Station Information</h3>
+                    <span class="close-modal" onclick="closeAddStationModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Station Name:</label>
+                        <input type="text" id="newStationName" placeholder="Enter station name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Location:</label>
+                        <input type="text" id="newStationLocation" placeholder="Enter full address" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Latitude:</label>
+                            <input type="number" step="any" id="newStationLat" placeholder="e.g., 10.7629" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Longitude:</label>
+                            <input type="number" step="any" id="newStationLng" placeholder="e.g., 106.6602" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeAddStationModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="submitNewStation()">Add Station</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Status Popup -->
+    <div id="apiStatusPopup" class="api-status-popup">
+        <div class="api-status-content">
+            <div class="api-status-header">
+                <h3><i class="fas fa-server"></i> API Status Monitor</h3>
+                <button class="close-api-status" onclick="closeApiStatusPopup()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="api-status-body">
+                <div class="api-status-item" id="apiStatusStations">
+                    <div class="api-status-icon">
+                        <i class="fas fa-charging-station"></i>
+                    </div>
+                    <div class="api-status-info">
+                        <h4>Stations Management</h4>
+                        <p class="api-endpoint">/api/stations</p>
+                    </div>
+                    <div class="api-status-indicator">
+                        <div class="status-badge status-checking">
+                            <i class="fas fa-spinner fa-spin"></i> Checking...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="api-status-item" id="apiStatusCustomers">
+                    <div class="api-status-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="api-status-info">
+                        <h4>Customer Management</h4>
+                        <p class="api-endpoint">/api/customers</p>
+                    </div>
+                    <div class="api-status-indicator">
+                        <div class="status-badge status-checking">
+                            <i class="fas fa-spinner fa-spin"></i> Checking...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="api-status-item" id="apiStatusReports">
+                    <div class="api-status-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <div class="api-status-info">
+                        <h4>Reports & Statistics</h4>
+                        <p class="api-endpoint">/api/reports</p>
+                    </div>
+                    <div class="api-status-indicator">
+                        <div class="status-badge status-checking">
+                            <i class="fas fa-spinner fa-spin"></i> Checking...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="api-status-item" id="apiStatusPricing">
+                    <div class="api-status-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="api-status-info">
+                        <h4>Price Management</h4>
+                        <p class="api-endpoint">/api/pricetable</p>
+                    </div>
+                    <div class="api-status-indicator">
+                        <div class="status-badge status-checking">
+                            <i class="fas fa-spinner fa-spin"></i> Checking...
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="api-status-footer">
+                <button class="btn btn-primary" onclick="recheckApiStatus()">
+                    <i class="fas fa-sync-alt"></i> Recheck All APIs
+                </button>
+                <p class="last-check-time">Last checked: <span id="lastCheckTime">Never</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Status Button (Floating) -->
+    <button class="api-status-button" onclick="openApiStatusPopup()" title="Check API Status">
+        <i class="fas fa-heartbeat"></i>
+        <span class="api-status-dot" id="apiStatusDot"></span>
+    </button>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>
