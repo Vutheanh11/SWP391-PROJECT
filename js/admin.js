@@ -54,17 +54,33 @@ function checkAuthentication() {
     const token = localStorage.getItem('adminToken');
     const userEmail = localStorage.getItem('userEmail');
     
+    // Check if we're on admin page
+    const isAdminPage = window.location.pathname.includes('admin.html');
+    
     if (!token || !userEmail) {
-        console.warn('No authentication found, redirecting to login...');
-        window.location.href = 'index.html';
-        return;
+        console.warn('❌ No authentication found');
+        
+        // Only redirect if we're on admin page without auth
+        if (isAdminPage) {
+            console.warn('🔄 Redirecting to login page...');
+            // Add a small delay to prevent rapid redirects
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 100);
+        }
+        
+        appState.isLoggedIn = false;
+        appState.currentUser = null;
+        return false;
     }
     
+    console.log('✅ Authentication verified for:', userEmail);
     appState.isLoggedIn = true;
     appState.currentUser = { email: userEmail };
     
     // Update profile display
     updateProfileDisplay();
+    return true;
 }
 
 function updateProfileDisplay() {
